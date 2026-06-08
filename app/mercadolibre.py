@@ -17,12 +17,23 @@ _ATTRIBUTE_FIELD_MAP = {
 
 _DIGITS_RE = re.compile(r"[\d.,]+")
 
+# MercadoLibre's API rejects requests whose User-Agent identifies them as a
+# script (e.g. httpx's default "python-httpx/x.y.z"), so we send a
+# browser-like one instead.
+_DEFAULT_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+    ),
+    "Accept": "application/json",
+}
+
 
 class MercadoLibreClient:
     """Thin async client around the public MercadoLibre search API for Uruguay."""
 
     def __init__(self, http_client: httpx.AsyncClient | None = None):
-        self._client = http_client or httpx.AsyncClient(base_url=BASE_URL, timeout=10.0)
+        self._client = http_client or httpx.AsyncClient(base_url=BASE_URL, timeout=10.0, headers=_DEFAULT_HEADERS)
         self._vehicles_category_id: str | None = None
 
     async def aclose(self) -> None:
